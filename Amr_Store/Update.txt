@@ -1,0 +1,24 @@
+﻿// --> Updates On Version 1 To be Version 2
+
+// -> DB Update
+
+// Add F_Price Col To Sells Table
+ALTER TABLE Sells
+ADD F_Price INT DEFAULT(0)
+
+// Add Version Row To Settings Table
+INSERT INTO Settings(Setting, Value) VALUES('Version', 1)
+
+// -> App Updates
+				// Get F_Prices From Prices Table Foreach sold product
+                DataTable dt_Prices =  myDB.GetDataTable("SELECT distinct s.P_ID P_ID, pp.F_Price FROM Sells s " +
+                    "INNER JOIN Products p ON S.P_ID = p.ID INNER JOIN Products_Prices pp " +
+                    "ON p.Art = pp.Art");
+
+                // Update Sells Table
+                foreach(DataRow r in dt_Prices.Rows)
+                {
+                    // r[0] = ID, r[1] F_Price
+                    myDB.CmdExcute("UPDATE Sells SET F_Price=" + r[1] + " WHERE P_ID=@P_ID", new string[]
+                    { "@P_ID",  r[0].ToString() });
+                }
